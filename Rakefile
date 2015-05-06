@@ -2,7 +2,7 @@
 # https://communities.vmware.com/thread/462303
 VMWARE_TOOLS_URL = "https://softwareupdate.vmware.com/cds/vmw-desktop/fusion/6.0.3/1747349/packages/com.vmware.fusion.tools.linux.zip.tar"
 VMWARE_TOOLS_ARCHIVE = "VMwareTools-9.6.2-1688356.tar.gz"
-VERSION = "2014-04-22"
+VERSION = "2014-05-11"
 WEBSERVER = "juvia-helper.phusion.nl"
 WEBROOT = "/srv/oss_binaries_passenger/vagrant/boxes/#{VERSION}"
 
@@ -157,10 +157,10 @@ DISTRO_RELEASES.each do |distro_release|
 	def create_release_task(name, distro_release, box_file)
 		desc "Release #{distro_release} #{name} box file to a public server"
 		task "release:#{distro_release}:#{name}" => box_file do
-			sh "ssh", WEBSERVER, "mkdir -p #{WEBROOT} && rm -rf #{WEBROOT}/tmp && mkdir #{WEBROOT}/tmp"
-			sh "scp #{box_file} #{WEBSERVER}:#{WEBROOT}/tmp/"
-			sh "md5sum #{box_file} | ssh #{WEBSERVER} tee #{WEBROOT}/tmp/#{box_file}.md5.txt"
-			sh "ssh", WEBSERVER, "mv #{WEBROOT}/tmp/* #{WEBROOT}/ && rm -rf #{WEBROOT}/tmp"
+			sh "ssh", WEBSERVER, "mkdir -p #{WEBROOT}"
+			sh "rsync --progress --partial-dir=.rsync-partial --human-readable " +
+				"#{box_file} #{WEBSERVER}:#{WEBROOT}/#{box_file}"
+			sh "md5sum #{box_file} | ssh #{WEBSERVER} tee #{WEBROOT}/#{box_file}.md5.txt"
 		end
 	end
 
